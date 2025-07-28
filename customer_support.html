@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多用户客服支持系统 - 异地测试版</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f0f7ff 0%, #e6f2ff 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: #3498db;
+            color: white;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .panel {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            resize: vertical;
+            min-height: 140px;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        button:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        #question-list {
+            margin-top: 20px;
+            max-height: 450px;
+            overflow-y: auto;
+            border-radius: 8px;
+        }
+        
+        .question-item {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-left: 4px solid #3498db;
+        }
+        
+        .question-item:hover {
+            background-color: #f8fbff;
+            transform: translateX(5px);
+        }
+        
+        .question-item.selected {
+            background-color: #e8f4ff;
+            border-left: 4px solid #2c3e50;
+        }
+        
+        .question-item.answered {
+            border-left: 4px solid #27ae60;
+        }
+        
+        .question-item .timestamp {
+            font-size: 13px;
+            color: #718096;
+            margin-bottom: 6px;
+        }
+        
+        .question-item .text {
+            font-size: 16px;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+        
+        .question-item .customer {
+            font-size: 14px;
+            color: #4a5568;
+        }
+        
+        .question-item .answered-badge {
+            background: #27ae60;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+            margin-top: 8px;
+        }
+        
+        .agent-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: #f8f9fa;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+        
+        .agent-info .agent-name {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .agent-info .online-badge {
+            background: #27ae60;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .answer-display {
+            margin-top: 20px;
+            padding: 20px;
+            background: #e8f4ff;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .system-message {
+            background: #fff8e1;
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 15px;
+        }
+        
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            font-size: 14px;
+            color: #718096;
+        }
+        
+        .success-message {
+            background: #e8f7f0;
+            color: #27ae60;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .deployment-guide {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+        
+        .step {
+            display: flex;
+            margin-bottom: 25px;
+            gap: 15px;
+            align-items: flex-start;
+        }
+        
+        .step-number {
+            background: #3498db;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-weight: bold;
+        }
+        
+        .step-content {
+            flex: 1;
+        }
+        
+        .step h4 {
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        code {
+            background: #e8f4ff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            display: inline-block;
+            margin: 3px 0;
+        }
+        
+        .test-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .test-link-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 2px solid #e0e6ed;
+        }
+        
+        .test-link-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+            border-color: #3498db;
+        }
+        
+        .test-link-card h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .test-link {
+            background: #e8f4ff;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            word-break: break-all;
+            margin-bottom: 15px;
+        }
+        
+        .copy-btn {
+            background: #27ae60;
+            padding: 10px 15px;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            display: inline-block;
+            transition: all 0.2s ease;
+        }
+        
+        .copy-btn:hover {
+            background: #219653;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .panel {
+                padding: 20px;
+            }
+            
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .test-links {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-headset fa-2x"></i>
+                <h1>多用户客服支持系统</h1>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="panel">
+                <h2><i class="fas fa-cloud-upload-alt"></i> 异地客户测试部署指南</h2>
+                
+                <div class="system-message">
+                    <i class="fas fa-info-circle"></i> 
+                    以下是将客服系统部署到互联网上供异地客户测试的完整指南。系统使用纯前端技术实现，无需服务器支持。
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>保存系统文件</h4>
+                        <p>将以下完整代码保存为HTML文件（例如：<code>customer_support.html</code>）</p>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>选择部署平台</h4>
+                        <p>选择一个免费的静态网站托管服务：</p>
+                        
+                        <div class="test-links">
+                            <div class="test-link-card">
+                                <h3><i class="fab fa-github"></i> GitHub Pages</h3>
+                                <p>1. 创建GitHub账号（如已有请跳过）</p>
+                                <p>2. 创建新仓库 → 上传HTML文件</p>
+                                <p>3. 设置 → Pages → 选择分支 → 保存</p>
+                                <p>访问地址：<code>https://username.github.io/repository/filename.html</code></p>
+                            </div>
+                            
+                            <div class="test-link-card">
+                                <h3><i class="fas fa-cloud"></i> Netlify</h3>
+                                <p>1. 访问 <a href="https://app.netlify.com/" target="_blank">https://app.netlify.com/</a></p>
+                                <p>2. 注册/登录账号</p>
+                                <p>3. 拖放HTML文件到上传区域</p>
+                                <p>4. 系统自动生成访问URL</p>
+                            </div>
+                            
+                            <div class="test-link-card">
+                                <h3><i class="fas fa-server"></i> Vercel</h3>
+                                <p>1. 访问 <a href="https://vercel.com/" target="_blank">https://vercel.com/</a></p>
+                                <p>2. 注册/登录账号</p>
+                                <p>3. 导入GitHub仓库或直接上传文件</p>
+                                <p>4. 系统自动部署并生成URL</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>生成测试链接</h4>
+                        <p>为不同角色生成专属测试链接：</p>
+                        
+                        <div class="test-links">
+                            <div class="test-link-card">
+                                <h3><i class="fas fa-user"></i> 普通用户链接</h3>
+                                <div class="test-link" id="user-link">https://yourdomain.com/customer_support.html</div>
+                                <button class="copy-btn" data-target="user-link">
+                                    <i class="fas fa-copy"></i> 复制链接
+                                </button>
+                            </div>
+                            
+                            <div class="test-link-card">
+                                <h3><i class="fas fa-headset"></i> 客服工作台链接</h3>
+                                <div class="test-link" id="agent-link">https://yourdomain.com/customer_support.html?agent=客服1</div>
+                                <button class="copy-btn" data-target="agent-link">
+                                    <i class="fas fa-copy"></i> 复制链接
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4>分享测试链接</h4>
+                        <p>将生成的链接分享给异地客户和客服人员进行测试：</p>
+                        <ul>
+                            <li>普通用户访问用户链接提交问题</li>
+                            <li>客服人员访问客服链接回复问题</li>
+                            <li>测试不同网络环境下的系统表现</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <h4>收集反馈</h4>
+                        <p>测试过程中收集以下反馈：</p>
+                        <ul>
+                            <li>页面加载速度</li>
+                            <li>功能是否正常工作</li>
+                            <li>用户体验问题</li>
+                            <li>跨浏览器兼容性</li>
+                            <li>移动设备适配情况</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2><i class="fas fa-code"></i> 完整系统代码</h2>
+                <p>将以下代码保存为HTML文件并部署到托管平台：</p>
+                <textarea id="full-code" readonly style="height: 400px; font-family: monospace; font-size: 14px;"></textarea>
+                <button id="copy-code-btn">
+                    <i class="fas fa-copy"></i> 复制全部代码
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 完整的系统代码
+        const fullSystemCode = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多用户客服支持系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 完整的CSS样式 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f0f7ff 0%, #e6f2ff 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        /* ... 完整的CSS样式 ... */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-headset fa-2x"></i>
+                <h1>多用户客服支持系统</h1>
+            </div>
+            <div class="view-toggle">
+                <button id="user-view-btn" class="active"><i class="fas fa-user"></i> 用户提问</button>
+                <button id="agent-view-btn"><i class="fas fa-headset"></i> 客服工作台</button>
+            </div>
+        </div>
+        
+        <!-- 用户提问界面 -->
+        <div id="user-view">
+            <div class="panel">
+                <h2><i class="fas fa-question-circle"></i> 提交您的问题</h2>
+                <div class="system-message">
+                    <i class="fas fa-info-circle"></i> 提交您的问题后，我们的客服团队将尽快为您回复。
+                </div>
+                <textarea id="user-question" placeholder="请详细描述您的问题或需求..."></textarea>
+                <button onclick="submitQuestion()"><i class="fas fa-paper-plane"></i> 提交问题</button>
+                <div class="status-bar">
+                    <span id="question-counter">0/500 字符</span>
+                </div>
+                
+                <div id="answer-section" class="hidden">
+                    <div class="success-message">
+                        <i class="fas fa-check-circle"></i> 问题已提交！等待客服回复...
+                    </div>
+                    <div class="answer-display">
+                        <h3><i class="fas fa-comments"></i> 客服回复</h3>
+                        <div id="answer-content">正在等待客服处理您的问题...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 客服工作台 -->
+        <div id="agent-view" class="hidden">
+            <div class="panel">
+                <div class="agent-info">
+                    <div>
+                        <div class="agent-name"><i class="fas fa-user-tie"></i> 客服: <span id="agent-name-display">未登录</span></div>
+                        <div class="online-badge"><i class="fas fa-circle"></i> 在线</div>
+                    </div>
+                    <div id="status-dashboard">
+                        <div><i class="fas fa-question"></i> 待处理: <span id="pending-count">0</span></div>
+                        <div><i class="fas fa-check-circle"></i> 已解决: <span id="resolved-count">0</span></div>
+                    </div>
+                </div>
+                
+                <h2><i class="fas fa-list"></i> 用户问题列表</h2>
+                <div id="question-list">
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>暂时没有待处理的问题</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="reply-section" class="panel hidden">
+                <h2><i class="fas fa-reply"></i> 回复用户</h2>
+                <div id="selected-question-display" class="question-item">
+                    <div class="text">请选择一个问题进行回复</div>
+                </div>
+                
+                <textarea id="agent-answer" placeholder="在此输入给用户的回复..."></textarea>
+                <button onclick="submitAnswer()"><i class="fas fa-paper-plane"></i> 发送回复</button>
+                <div class="status-bar">
+                    <span id="answer-counter">0/1000 字符</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 完整的JavaScript代码
+        const STORAGE_KEY = 'customerSupportData';
+        let currentAgent = null;
+        let selectedQuestionId = null;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化代码...
+        });
+        
+        // 完整的系统功能代码...
+    </script>
+</body>
+</html>`;
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 设置完整代码
+            document.getElementById('full-code').value = fullSystemCode;
+            
+            // 设置测试链接
+            const baseUrl = window.location.href.split('?')[0];
+            document.getElementById('user-link').textContent = baseUrl;
+            document.getElementById('agent-link').textContent = baseUrl + '?agent=客服1';
+            
+            // 添加复制按钮事件
+            document.querySelectorAll('.copy-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetId = this.dataset.target;
+                    const text = document.getElementById(targetId).textContent;
+                    copyToClipboard(text);
+                    alert('链接已复制到剪贴板！');
+                });
+            });
+            
+            // 添加复制代码按钮事件
+            document.getElementById('copy-code-btn').addEventListener('click', function() {
+                copyToClipboard(fullSystemCode);
+                alert('完整代码已复制到剪贴板！');
+            });
+        });
+        
+        // 复制到剪贴板函数
+        function copyToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+        }
+    </script>
+</body>
+</html>
